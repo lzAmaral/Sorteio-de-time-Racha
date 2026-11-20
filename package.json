@@ -1,6 +1,7 @@
 {
   "name": "sorteio-de-time-racha",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "apps/*",
     "packages/*"
