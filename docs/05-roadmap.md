@@ -25,7 +25,7 @@ Meta: organizadores reais usando toda semana. Métrica: sorteios/semana, % compa
 
 - [ ] Deploy (Vercel) + domínio próprio (decidir marca antes — ver [negócio](02-negocio.md))
 - [x] PWA: manifest, ícone, offline (service worker) — "funciona na beira do campo"
-- [ ] Compartilhar resultado como **imagem** (diferencial raro; validado no teammaker)
+- [x] Compartilhar resultado como **imagem** (card em canvas + Web Share API) — #3
 - [x] Ajuste manual pós-sorteio (tap-tap para trocar jogador entre times)
 - [ ] Reservas/suplentes (quem chegou depois da lista fechar)
 - [ ] Analytics de uso (ex.: Plausible/Umami — sem cookie banner)
