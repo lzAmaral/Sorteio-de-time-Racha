@@ -32,6 +32,7 @@ Sorteio-de-time-Racha/
 | Stack TS + Next.js + Tailwind | Padrão dos projetos polidos do nicho; um só idioma no monorepo | [ADR-0001](decisoes/ADR-0001-stack.md) |
 | Local-first, sem backend no MVP | Zero fricção e funciona na beira do campo; Supabase entra na Fase 2 | [ADR-0002](decisoes/ADR-0002-local-first.md) |
 | Greedy + hill-climbing no sorteio | Ponto ótimo custo-benefício validado na pesquisa OSS | [ADR-0003](decisoes/ADR-0003-algoritmo.md) |
+| PWA com service worker manual | App de rota única e estático não justifica `next-pwa`/Workbox | [ADR-0004](decisoes/ADR-0004-pwa.md) |
 
 ## O pacote `@racha/core`
 
@@ -58,12 +59,16 @@ texto colado ──parser──▶ Player[] ──(edição do usuário)──�
   por nome de jogador) persistem no navegador do organizador — na semana seguinte, colar
   a lista já recupera as notas. Esse é o começo da retenção, sem exigir conta.
 - Compartilhamento: `navigator.clipboard` + deep link `https://wa.me/?text=…`.
+- **PWA**: manifest em `app/manifest.ts`, service worker manual em `public/sw.js`
+  (network-first nas navegações, cache-first com revalidação nos assets) registrado por
+  `components/service-worker-registration.tsx`. Ícones gerados por `npm run icons`
+  (`scripts/generate-icons.mjs`, sem dependências). Detalhes no [ADR-0004](decisoes/ADR-0004-pwa.md).
 
 ## Evolução planejada (não construir antes da hora)
 
 | Fase | Mudança arquitetural |
 |---|---|
-| Fase 1 (polimento) | PWA (manifest + service worker), compartilhar como imagem (canvas/`html-to-image`), analytics de uso |
+| Fase 1 (polimento) | ✅ PWA (manifest + service worker); compartilhar como imagem (canvas/`html-to-image`), analytics de uso |
 | Fase 2 (grupos/contas) | Supabase: auth, Postgres + RLS; `@racha/core` permanece intacto; nasce `packages/db` com schema e acesso |
 | Fase 3 (arena B2B) | Novo app `apps/arena` (painel do dono de quadra) no mesmo monorepo, reusando core e db; cobrança Pix via PSP (ex.: Mercado Pago, Asaas) |
 | Fase 4 (marketplace) | Página pública de quadras + vagas avulsas; só então existe backend "de verdade" com jobs |

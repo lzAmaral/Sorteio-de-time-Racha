@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -9,6 +10,12 @@ export const metadata: Metadata = {
   title: "Sorteio do Racha — times equilibrados em segundos",
   description:
     "Cola a lista do grupo, define quantos times e pronto: sorteio equilibrado, cor de colete pra cada time e o resultado pronto pra mandar no zap.",
+  applicationName: "Sorteio do Racha",
+  appleWebApp: {
+    capable: true,
+    title: "Sorteio",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
@@ -24,6 +31,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={cn("font-sans", geist.variable)}>
       <body className="min-h-dvh bg-zinc-50 text-foreground antialiased">
         {children}
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

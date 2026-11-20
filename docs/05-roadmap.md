@@ -24,7 +24,7 @@ O produto da frase original: *"Cola a lista do grupo, define quantos times e pro
 Meta: organizadores reais usando toda semana. Métrica: sorteios/semana, % compartilha.
 
 - [ ] Deploy (Vercel) + domínio próprio (decidir marca antes — ver [negócio](02-negocio.md))
-- [ ] PWA: manifest, ícone, offline (service worker) — "funciona na beira do campo"
+- [x] PWA: manifest, ícone, offline (service worker) — "funciona na beira do campo"
 - [ ] Compartilhar resultado como **imagem** (diferencial raro; validado no teammaker)
 - [ ] Ajuste manual pós-sorteio (arrastar/trocar jogador entre times)
 - [ ] Reservas/suplentes (quem chegou depois da lista fechar)
