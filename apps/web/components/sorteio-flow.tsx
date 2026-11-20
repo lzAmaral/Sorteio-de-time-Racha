@@ -20,6 +20,8 @@ import {
   Copy,
   Dices,
   Hand,
+  ImageDown,
+  LoaderCircle,
   MessageCircle,
   Minus,
   Plus,
@@ -92,6 +94,9 @@ export function SorteioFlow() {
   /** Jogador que recebeu toque inválido — dispara shake + ring vermelho. */
   const [blockedId, setBlockedId] = useState<string | null>(null);
   const [swapMessage, setSwapMessage] = useState<string | null>(null);
+  /** Geração do PNG em andamento (botão "Compartilhar imagem"). */
+  const [imageBusy, setImageBusy] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const idCounter = useRef(0);
   const blockedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -233,6 +238,27 @@ export function SorteioFlow() {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard bloqueado (http/permissão): o usuário ainda tem o botão do WhatsApp
+    }
+  }
+
+  /**
+   * Gera o card PNG do estado ATUAL de `teams` (com as trocas manuais) e
+   * entrega pelo share nativo; sem suporte, baixa o arquivo. O renderer entra
+   * por import dinâmico pra não pesar no primeiro carregamento (4G ruim).
+   */
+  async function shareImage() {
+    if (!teams || imageBusy) return;
+    setImageBusy(true);
+    setImageFailed(false);
+    try {
+      const { renderResultImage, shareResultImage } = await import(
+        "@/lib/result-image"
+      );
+      await shareResultImage(await renderResultImage(teams));
+    } catch {
+      setImageFailed(true);
+    } finally {
+      setImageBusy(false);
     }
   }
 
@@ -527,6 +553,27 @@ export function SorteioFlow() {
                 </Button>
               )}
             </div>
+          )}
+
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-11 w-full"
+            disabled={imageBusy}
+            onClick={shareImage}
+          >
+            {imageBusy ? (
+              <LoaderCircle data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <ImageDown data-icon="inline-start" />
+            )}
+            {imageBusy ? "Gerando imagem…" : "Compartilhar imagem"}
+          </Button>
+          {imageFailed && (
+            <p className="text-xs text-destructive" role="status">
+              Não deu pra gerar a imagem agora — manda o texto que funciona
+              igual.
+            </p>
           )}
 
           <div className="grid grid-cols-2 gap-2">
