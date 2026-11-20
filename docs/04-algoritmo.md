@@ -57,6 +57,30 @@ Modo `random`: goleiros 1 por time + round-robin embaralhado (sem etapas 2–3).
 otimização futura. O greedy + trocas chega a espread ≤ 1 nível em praticamente todos os
 casos reais, com código simples e explicável.
 
+## 2.1 Ajuste manual pós-sorteio (`swap.ts`)
+
+O organizador dá a palavra final (issue #4): `swapPlayers(teams, idA, idB)` troca dois
+jogadores de times diferentes e devolve um **novo** array de times (entrada nunca é
+mutada), reaplicando a ordem de apresentação (goleiro primeiro).
+
+| Caso | Comportamento |
+|---|---|
+| Linha ↔ linha de times diferentes | troca aplicada |
+| Goleiro ↔ goleiro de times diferentes | troca aplicada (mantém 1 goleiro por time) |
+| Goleiro ↔ linha | recusa, `code: "posicao-incompativel"` |
+| Mesmo time (ou o mesmo jogador) | recusa, `code: "mesmo-time"` |
+| Id que não está em nenhum time | recusa, `code: "jogador-nao-encontrado"` |
+
+**Decisão de API:** caso inválido **lança** `SwapError` (erro tipado com `code`), porque
+troca inválida é bug de chamada, não fluxo esperado. Para a UI precisar apenas *saber* se
+pode trocar — pintar quem está indisponível, dar feedback de bloqueado — existe
+`canSwap(teams, idA, idB)`, que retorna resultado discriminado
+(`{ ok: true } | { ok: false; code; message }`) sem lançar.
+
+Na web o ajuste é **tap-tap** (sem drag-and-drop: ruim no mobile): 1º toque seleciona,
+toque em alguém de outro time troca, toque no mesmo jogador cancela. "Sortear de novo"
+recalcula a partir da lista e descarta os ajustes manuais.
+
 ## 3. Saída para o WhatsApp (`formatter.ts` + `vests.ts`)
 
 Paleta de coletes na ordem: Preto 🖤, Branco 🤍, Laranja 🧡, Azul 💙, Verde 💚,

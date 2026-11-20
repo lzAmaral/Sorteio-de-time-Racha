@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  canSwap,
   drawTeams,
   formatWhatsApp,
   parseList,
+  swapPlayers,
   whatsAppShareUrl,
   type DrawMode,
   type Player,
@@ -12,6 +14,7 @@ import {
 } from "@racha/core";
 import {
   ArrowLeft,
+  ArrowLeftRight,
   ArrowRight,
   Check,
   Copy,
@@ -84,7 +87,14 @@ export function SorteioFlow() {
   const [teams, setTeams] = useState<Team[] | null>(null);
   const [copied, setCopied] = useState(false);
   const [newName, setNewName] = useState("");
+  /** Jogador em "modo troca" (primeiro toque). */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  /** Jogador que recebeu toque inválido — dispara shake + ring vermelho. */
+  const [blockedId, setBlockedId] = useState<string | null>(null);
+  const [swapMessage, setSwapMessage] = useState<string | null>(null);
   const idCounter = useRef(0);
+  const blockedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messageTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     try {
@@ -145,10 +155,74 @@ export function SorteioFlow() {
     setNewName("");
   }
 
+  useEffect(
+    () => () => {
+      if (blockedTimer.current) clearTimeout(blockedTimer.current);
+      if (messageTimer.current) clearTimeout(messageTimer.current);
+    },
+    [],
+  );
+
+  /** Zera o modo troca. Usado ao sortear de novo, cancelar e sair do passo. */
+  function clearSwapState() {
+    setSelectedId(null);
+    setBlockedId(null);
+    setSwapMessage(null);
+    if (blockedTimer.current) clearTimeout(blockedTimer.current);
+    if (messageTimer.current) clearTimeout(messageTimer.current);
+  }
+
+  function flashMessage(text: string) {
+    setSwapMessage(text);
+    if (messageTimer.current) clearTimeout(messageTimer.current);
+    messageTimer.current = setTimeout(() => setSwapMessage(null), 2600);
+  }
+
   function sortear() {
+    // Novo sorteio a partir de `players`: descarta qualquer ajuste manual.
+    clearSwapState();
     setTeams(drawTeams(players, { teamCount, mode }));
     setStep("resultado");
     setCopied(false);
+  }
+
+  /**
+   * Tap-tap do ajuste manual (issue #4): 1º toque seleciona, 2º toque em outro
+   * time troca, toque no mesmo jogador desseleciona. A regra de validade vive
+   * no core (`canSwap`/`swapPlayers`).
+   */
+  function tapPlayer(player: Player) {
+    if (!teams) return;
+
+    if (!selectedId) {
+      setSelectedId(player.id);
+      setSwapMessage(null);
+      return;
+    }
+
+    if (selectedId === player.id) {
+      clearSwapState();
+      return;
+    }
+
+    const check = canSwap(teams, selectedId, player.id);
+    if (!check.ok) {
+      setBlockedId(player.id);
+      if (blockedTimer.current) clearTimeout(blockedTimer.current);
+      blockedTimer.current = setTimeout(() => setBlockedId(null), 400);
+      flashMessage(
+        check.code === "mesmo-time"
+          ? "Escolhe alguém de outro time"
+          : check.message,
+      );
+      return;
+    }
+
+    setTeams(swapPlayers(teams, selectedId, player.id));
+    setSelectedId(null);
+    setBlockedId(null);
+    setCopied(false);
+    flashMessage("Trocado!");
   }
 
   async function copyResult() {
@@ -164,6 +238,10 @@ export function SorteioFlow() {
 
   const maxTeams = Math.min(8, Math.max(2, Math.floor(players.length / 2)));
   const stepIndex = step === "lista" ? 0 : step === "config" ? 1 : 2;
+  const selectedPlayer =
+    (selectedId &&
+      teams?.flatMap((t) => t.players).find((p) => p.id === selectedId)) ||
+    null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -343,6 +421,11 @@ export function SorteioFlow() {
 
       {step === "resultado" && (
         <>
+          <p className="text-xs text-muted-foreground">
+            Não concordou? Toca num jogador e depois em alguém de outro time pra
+            trocar.
+          </p>
+
           {teams?.map((team) => (
             <Card key={team.vest.name} size="sm" className="pt-0">
               <div className="h-1.5" style={{ background: team.vest.hex }} />
@@ -359,25 +442,92 @@ export function SorteioFlow() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ol className="divide-y divide-border">
-                  {team.players.map((p, i) => (
-                    <li key={p.id} className="flex items-center gap-3 py-1.5 text-sm">
-                      <span className="w-4 text-right text-xs text-muted-foreground tabular-nums">
-                        {i + 1}
-                      </span>
-                      <span className="font-medium">{p.name}</span>
-                      {p.isGoalkeeper && (
-                        <Badge variant="outline" className="ml-auto gap-1">
-                          <Hand className="size-3" />
-                          goleiro
-                        </Badge>
-                      )}
-                    </li>
-                  ))}
+                <ol className="flex flex-col gap-0.5">
+                  {team.players.map((p, i) => {
+                    const isSelected = selectedId === p.id;
+                    const isBlocked = blockedId === p.id;
+                    const unavailable =
+                      !!selectedPlayer &&
+                      !isSelected &&
+                      !!teams &&
+                      !canSwap(teams, selectedPlayer.id, p.id).ok;
+                    return (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          onClick={() => tapPlayer(p)}
+                          aria-pressed={isSelected}
+                          aria-label={
+                            isSelected
+                              ? `${p.name}: selecionado para troca, toca de novo pra cancelar`
+                              : `${p.name}: selecionar para troca`
+                          }
+                          className={cn(
+                            "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors",
+                            isSelected &&
+                              "bg-primary/5 ring-2 ring-primary ring-inset",
+                            isBlocked &&
+                              "animate-shake bg-destructive/10 ring-1 ring-destructive ring-inset",
+                            !isSelected && !isBlocked && "hover:bg-muted",
+                            unavailable && !isBlocked && "opacity-40",
+                          )}
+                        >
+                          <span className="w-4 text-right text-xs text-muted-foreground tabular-nums">
+                            {i + 1}
+                          </span>
+                          <span className="font-medium">{p.name}</span>
+                          {p.isGoalkeeper && (
+                            <Badge variant="outline" className="ml-auto gap-1">
+                              <Hand className="size-3" />
+                              goleiro
+                            </Badge>
+                          )}
+                          {isSelected && (
+                            <ArrowLeftRight
+                              className={cn(
+                                "size-3.5 text-primary",
+                                !p.isGoalkeeper && "ml-auto",
+                              )}
+                            />
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ol>
               </CardContent>
             </Card>
           ))}
+
+          {(selectedPlayer || swapMessage) && (
+            <div
+              className={cn(
+                "sticky bottom-2 z-10 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs shadow-sm backdrop-blur",
+                blockedId
+                  ? "border-destructive/40 bg-destructive/10 text-destructive"
+                  : "border-primary/30 bg-primary/5 text-foreground",
+              )}
+              role="status"
+              aria-live="polite"
+            >
+              <ArrowLeftRight className="size-3.5 shrink-0" />
+              <span className="min-w-0 flex-1">
+                {swapMessage ??
+                  `${selectedPlayer!.name} selecionado — toca em alguém de outro time`}
+              </span>
+              {selectedPlayer && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 shrink-0 px-2 text-xs"
+                  onClick={clearSwapState}
+                >
+                  <X data-icon="inline-start" />
+                  Cancelar
+                </Button>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-2">
             <Button
@@ -406,7 +556,13 @@ export function SorteioFlow() {
             <RefreshCw data-icon="inline-start" />
             Sortear de novo
           </Button>
-          <Button variant="ghost" onClick={() => setStep("config")}>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              clearSwapState();
+              setStep("config");
+            }}
+          >
             <ArrowLeft data-icon="inline-start" />
             Mudar times
           </Button>

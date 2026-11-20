@@ -1,5 +1,6 @@
 import type { DrawOptions, Player, Team } from "./types";
 import { shuffle } from "./random";
+import { sortForDisplay } from "./display";
 import { vestFor } from "./vests";
 
 const MAX_REFINE_PASSES = 60;
@@ -130,13 +131,6 @@ function refineBySwaps(rosters: Player[][]): void {
     }
     if (!improved) return;
   }
-}
-
-function sortForDisplay(roster: Player[]): Player[] {
-  return [
-    ...roster.filter((p) => p.isGoalkeeper),
-    ...roster.filter((p) => !p.isGoalkeeper),
-  ];
 }
 
 function indices(count: number): number[] {
