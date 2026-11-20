@@ -1,20 +1,30 @@
+import { Shirt } from "lucide-react";
 import { SorteioFlow } from "@/components/sorteio-flow";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pb-10 pt-8">
-      <header className="mb-6 text-center">
-        <h1 className="text-2xl font-black tracking-tight">
-          ⚽ Sorteio do Racha
-        </h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Cola a lista do grupo, define quantos times e pronto.
-        </p>
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4">
+      <header className="flex items-center gap-2.5 py-5">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <Shirt className="size-4" />
+        </div>
+        <div className="leading-tight">
+          <p className="text-[15px] font-semibold tracking-tight">
+            Sorteio do Racha
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Times equilibrados em segundos
+          </p>
+        </div>
       </header>
-      <SorteioFlow />
-      <footer className="mt-auto pt-10 text-center text-xs text-zinc-600">
+
+      <main className="flex-1 pb-10">
+        <SorteioFlow />
+      </main>
+
+      <footer className="pb-6 text-center text-xs text-muted-foreground">
         Grátis, sem cadastro. Suas notas ficam só no seu navegador.
       </footer>
-    </main>
+    </div>
   );
 }

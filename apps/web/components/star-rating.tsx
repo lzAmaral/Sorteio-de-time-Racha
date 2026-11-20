@@ -1,5 +1,8 @@
 "use client";
 
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+
 export function StarRating({
   value,
   onChange,
@@ -8,7 +11,7 @@ export function StarRating({
   onChange: (skill: number) => void;
 }) {
   return (
-    <div className="flex" role="radiogroup" aria-label="Nota do jogador">
+    <div className="flex items-center" role="radiogroup" aria-label="Nota do jogador">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
@@ -17,11 +20,16 @@ export function StarRating({
           aria-checked={value === star}
           aria-label={`${star} de 5`}
           onClick={() => onChange(star)}
-          className={`px-0.5 text-base leading-none transition-transform active:scale-125 ${
-            star <= value ? "opacity-100" : "opacity-25 grayscale"
-          }`}
+          className="p-0.5 transition-transform active:scale-110"
         >
-          ⭐
+          <Star
+            className={cn(
+              "size-4",
+              star <= value
+                ? "fill-amber-400 stroke-amber-400"
+                : "fill-transparent stroke-zinc-300",
+            )}
+          />
         </button>
       ))}
     </div>

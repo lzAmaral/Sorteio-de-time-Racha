@@ -10,7 +10,33 @@ import {
   type Player,
   type Team,
 } from "@racha/core";
-import { StarRating } from "./star-rating";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Copy,
+  Dices,
+  Hand,
+  MessageCircle,
+  Minus,
+  Plus,
+  RefreshCw,
+  Scale,
+  X,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { StarRating } from "@/components/star-rating";
+import { cn } from "@/lib/utils";
 
 type Step = "lista" | "config" | "resultado";
 
@@ -22,13 +48,14 @@ interface StoredNote {
 const NOTES_KEY = "racha:notas";
 const CONFIG_KEY = "racha:config";
 
-const EXAMPLE = [
+const PLACEHOLDER = [
+  "Cola aqui a lista, do jeito que ela está no grupo:",
+  "",
   "1. Carlão (g)",
   "2. João",
   "3. Pedro - 4",
   "4. Lucas",
-  "5. Rafa ⭐⭐",
-  "6. Zé",
+  "5. Rafa",
 ].join("\n");
 
 function loadNotes(): Record<string, StoredNote> {
@@ -136,275 +163,313 @@ export function SorteioFlow() {
   }
 
   const maxTeams = Math.min(8, Math.max(2, Math.floor(players.length / 2)));
+  const stepIndex = step === "lista" ? 0 : step === "config" ? 1 : 2;
 
-  if (step === "lista") {
-    return (
-      <section className="flex flex-col gap-4">
-        <StepBadge current={1} label="Cola a lista do grupo" />
-        <textarea
-          value={rawText}
-          onChange={(e) => setRawText(e.target.value)}
-          onBlur={readList}
-          placeholder={`Cola aqui a lista do zap, do jeito que estiver:\n\n${EXAMPLE}`}
-          rows={8}
-          className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4 font-mono text-sm placeholder:text-zinc-600 focus:border-green-600 focus:outline-none"
-        />
-        {rawText.trim() !== "" && players.length === 0 && (
-          <button
-            type="button"
-            onClick={readList}
-            className="rounded-xl bg-zinc-800 py-3 font-semibold"
-          >
-            Ler lista
-          </button>
-        )}
+  return (
+    <div className="flex flex-col gap-4">
+      <StepNav current={stepIndex} />
 
-        {players.length > 0 && (
-          <>
-            <p className="text-sm text-zinc-400">
-              <strong className="text-zinc-200">{players.length} jogadores</strong>{" "}
-              — ajusta as notas (só você vê) e marca os goleiros:
-            </p>
-            <ul className="flex flex-col gap-1.5">
-              {players.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2"
-                >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updatePlayer(p.id, { isGoalkeeper: !p.isGoalkeeper })
-                    }
-                    aria-label={`${p.name}: alternar goleiro`}
-                    className={`rounded-lg px-1.5 py-1 text-base ${
-                      p.isGoalkeeper
-                        ? "bg-green-900/60"
-                        : "opacity-30 grayscale"
-                    }`}
-                  >
-                    🧤
-                  </button>
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                    {p.name}
-                  </span>
-                  <StarRating
-                    value={p.skill}
-                    onChange={(skill) => updatePlayer(p.id, { skill })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPlayers((cur) => cur.filter((x) => x.id !== p.id))
-                    }
-                    aria-label={`Remover ${p.name}`}
-                    className="px-1 text-zinc-600 hover:text-red-400"
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="flex gap-2">
-              <input
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addPlayer()}
-                placeholder="Chegou mais um? Nome…"
-                className="min-w-0 flex-1 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm placeholder:text-zinc-600 focus:border-green-600 focus:outline-none"
+      {step === "lista" && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Cola a lista do grupo</CardTitle>
+              <CardDescription>
+                Números, seções de goleiro, ✅ de confirmação — pode colar do
+                jeito que estiver.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={rawText}
+                onChange={(e) => setRawText(e.target.value)}
+                onBlur={readList}
+                placeholder={PLACEHOLDER}
+                rows={8}
+                className="resize-none font-mono text-[13px] leading-5"
               />
-              <button
-                type="button"
-                onClick={addPlayer}
-                className="rounded-xl bg-zinc-800 px-4 text-sm font-semibold"
-              >
-                +
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => setStep("config")}
-              disabled={players.length < 4}
-              className="rounded-xl bg-green-600 py-3.5 text-base font-bold text-white disabled:opacity-40"
-            >
-              Continuar →
-            </button>
-          </>
-        )}
-      </section>
-    );
-  }
+            </CardContent>
+          </Card>
 
-  if (step === "config") {
-    const perTeam = Math.floor(players.length / teamCount);
-    const leftover = players.length % teamCount;
-    return (
-      <section className="flex flex-col gap-5">
-        <StepBadge current={2} label="Define os times" />
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-          <p className="mb-3 text-sm font-semibold text-zinc-300">
-            Quantos times?
-          </p>
-          <div className="flex items-center justify-center gap-6">
-            <Stepper
-              onClick={() => setTeamCount((n) => Math.max(2, n - 1))}
-              label="−"
-            />
-            <span className="w-10 text-center text-4xl font-black">
-              {teamCount}
-            </span>
-            <Stepper
-              onClick={() => setTeamCount((n) => Math.min(maxTeams, n + 1))}
-              label="+"
-            />
-          </div>
-          <p className="mt-3 text-center text-sm text-zinc-400">
-            {players.length} jogadores → {teamCount} times de {perTeam}
-            {leftover > 0 && ` (${leftover} time${leftover > 1 ? "s" : ""} com ${perTeam + 1})`}
-          </p>
-        </div>
+          {players.length > 0 && (
+            <Card size="sm">
+              <CardHeader>
+                <CardTitle>
+                  {players.length} jogadores
+                  <Badge variant="secondary" className="ml-2 align-middle">
+                    {players.filter((p) => p.isGoalkeeper).length} no gol
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Ajusta as notas (só você vê) e marca quem é goleiro.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="divide-y divide-border">
+                  {players.map((p) => (
+                    <li key={p.id} className="flex items-center gap-2 py-1.5">
+                      <Button
+                        variant={p.isGoalkeeper ? "default" : "ghost"}
+                        size="icon-sm"
+                        aria-label={`${p.name}: alternar goleiro`}
+                        onClick={() =>
+                          updatePlayer(p.id, { isGoalkeeper: !p.isGoalkeeper })
+                        }
+                      >
+                        <Hand
+                          className={cn(!p.isGoalkeeper && "stroke-zinc-400")}
+                        />
+                      </Button>
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                        {p.name}
+                      </span>
+                      <StarRating
+                        value={p.skill}
+                        onChange={(skill) => updatePlayer(p.id, { skill })}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Remover ${p.name}`}
+                        className="text-zinc-400 hover:text-destructive"
+                        onClick={() =>
+                          setPlayers((cur) => cur.filter((x) => x.id !== p.id))
+                        }
+                      >
+                        <X />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addPlayer()}
+                    placeholder="Chegou mais um? Nome…"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    aria-label="Adicionar jogador"
+                    onClick={addPlayer}
+                  >
+                    <Plus />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-          <p className="mb-3 text-sm font-semibold text-zinc-300">Sorteio</p>
-          <div className="grid grid-cols-2 gap-2">
-            <ModeButton
-              active={mode === "balanced"}
-              onClick={() => setMode("balanced")}
-              title="⚖️ Equilibrado"
-              subtitle="usa as notas"
-            />
-            <ModeButton
-              active={mode === "random"}
-              onClick={() => setMode("random")}
-              title="🎲 Aleatório"
-              subtitle="pura sorte"
-            />
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={sortear}
-          className="rounded-xl bg-green-600 py-4 text-lg font-black text-white"
-        >
-          ⚽ Sortear times
-        </button>
-        <button
-          type="button"
-          onClick={() => setStep("lista")}
-          className="text-sm text-zinc-500"
-        >
-          ← Voltar pra lista
-        </button>
-      </section>
-    );
-  }
-
-  return (
-    <section className="flex flex-col gap-4">
-      <StepBadge current={3} label="Resultado — bora pro jogo!" />
-      <div className="flex flex-col gap-3">
-        {teams?.map((team) => (
-          <article
-            key={team.vest.name}
-            className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/60"
+          <Button
+            size="lg"
+            className="h-11 w-full text-[15px]"
+            disabled={players.length < 4}
+            onClick={() => setStep("config")}
           >
-            <header
-              className="flex items-center gap-2 px-4 py-2.5 font-bold"
-              style={{ background: team.vest.hex, color: team.vest.textHex }}
+            Continuar
+            <ArrowRight data-icon="inline-end" />
+          </Button>
+        </>
+      )}
+
+      {step === "config" && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Quantos times?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center gap-6 py-2">
+                <Button
+                  variant="outline"
+                  size="icon-lg"
+                  className="rounded-full"
+                  aria-label="Menos um time"
+                  onClick={() => setTeamCount((n) => Math.max(2, n - 1))}
+                >
+                  <Minus />
+                </Button>
+                <span className="w-12 text-center text-4xl font-semibold tracking-tight tabular-nums">
+                  {teamCount}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon-lg"
+                  className="rounded-full"
+                  aria-label="Mais um time"
+                  onClick={() => setTeamCount((n) => Math.min(maxTeams, n + 1))}
+                >
+                  <Plus />
+                </Button>
+              </div>
+              <p className="text-center text-sm text-muted-foreground">
+                {teamSummary(players.length, teamCount)}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tipo de sorteio</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-2">
+              <ModeOption
+                active={mode === "balanced"}
+                onClick={() => setMode("balanced")}
+                icon={<Scale className="size-4" />}
+                title="Equilibrado"
+                subtitle="usa as notas"
+              />
+              <ModeOption
+                active={mode === "random"}
+                onClick={() => setMode("random")}
+                icon={<Dices className="size-4" />}
+                title="Aleatório"
+                subtitle="pura sorte"
+              />
+            </CardContent>
+          </Card>
+
+          <Button size="lg" className="h-11 w-full text-[15px]" onClick={sortear}>
+            Sortear times
+          </Button>
+          <Button variant="ghost" onClick={() => setStep("lista")}>
+            <ArrowLeft data-icon="inline-start" />
+            Voltar pra lista
+          </Button>
+        </>
+      )}
+
+      {step === "resultado" && (
+        <>
+          {teams?.map((team) => (
+            <Card key={team.vest.name} size="sm" className="pt-0">
+              <div className="h-1.5" style={{ background: team.vest.hex }} />
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span
+                    className="size-3.5 rounded-full border border-black/15"
+                    style={{ background: team.vest.hex }}
+                  />
+                  Time {team.vest.name}
+                  <Badge variant="secondary" className="ml-auto">
+                    {team.players.length} jogadores
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ol className="divide-y divide-border">
+                  {team.players.map((p, i) => (
+                    <li key={p.id} className="flex items-center gap-3 py-1.5 text-sm">
+                      <span className="w-4 text-right text-xs text-muted-foreground tabular-nums">
+                        {i + 1}
+                      </span>
+                      <span className="font-medium">{p.name}</span>
+                      {p.isGoalkeeper && (
+                        <Badge variant="outline" className="ml-auto gap-1">
+                          <Hand className="size-3" />
+                          goleiro
+                        </Badge>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </CardContent>
+            </Card>
+          ))}
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-11"
+              onClick={copyResult}
             >
-              <span>{team.vest.emoji}</span>
-              <span>TIME {team.vest.name.toUpperCase()}</span>
-              <span className="ml-auto text-sm font-semibold opacity-70">
-                {team.players.length}
-              </span>
-            </header>
-            <ul className="px-4 py-3 text-sm">
-              {team.players.map((p, i) => (
-                <li key={p.id} className="flex gap-2 py-0.5">
-                  <span className="w-5 text-zinc-500">{i + 1}.</span>
-                  <span className="font-medium">{p.name}</span>
-                  {p.isGoalkeeper && <span>🧤</span>}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-
-      <div className="mt-1 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={copyResult}
-          className="rounded-xl bg-zinc-800 py-3.5 font-bold"
-        >
-          {copied ? "✅ Copiado!" : "📋 Copiar"}
-        </button>
-        <a
-          href={teams ? whatsAppShareUrl(formatWhatsApp(teams)) : "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-xl bg-green-600 py-3.5 text-center font-bold text-white"
-        >
-          💬 Mandar no zap
-        </a>
-      </div>
-      <button
-        type="button"
-        onClick={sortear}
-        className="rounded-xl border border-zinc-700 py-3 font-semibold text-zinc-300"
-      >
-        🔁 Sortear de novo
-      </button>
-      <button
-        type="button"
-        onClick={() => setStep("config")}
-        className="text-sm text-zinc-500"
-      >
-        ← Mudar times
-      </button>
-    </section>
-  );
-}
-
-function StepBadge({ current, label }: { current: number; label: string }) {
-  return (
-    <div className="flex items-center gap-2 text-sm text-zinc-400">
-      <span className="flex gap-1">
-        {[1, 2, 3].map((n) => (
-          <span
-            key={n}
-            className={`h-1.5 w-6 rounded-full ${
-              n <= current ? "bg-green-500" : "bg-zinc-800"
-            }`}
-          />
-        ))}
-      </span>
-      <span className="font-semibold text-zinc-200">{label}</span>
+              {copied ? <Check data-icon="inline-start" /> : <Copy data-icon="inline-start" />}
+              {copied ? "Copiado!" : "Copiar"}
+            </Button>
+            <a
+              href={teams ? whatsAppShareUrl(formatWhatsApp(teams)) : "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "h-11 bg-[#1daa61] text-white hover:bg-[#1daa61]/90",
+              )}
+            >
+              <MessageCircle data-icon="inline-start" />
+              Mandar no zap
+            </a>
+          </div>
+          <Button variant="outline" onClick={sortear}>
+            <RefreshCw data-icon="inline-start" />
+            Sortear de novo
+          </Button>
+          <Button variant="ghost" onClick={() => setStep("config")}>
+            <ArrowLeft data-icon="inline-start" />
+            Mudar times
+          </Button>
+        </>
+      )}
     </div>
   );
 }
 
-function Stepper({ onClick, label }: { onClick: () => void; label: string }) {
+function StepNav({ current }: { current: number }) {
+  const steps = ["Lista", "Times", "Resultado"];
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="h-12 w-12 rounded-full border border-zinc-700 text-2xl font-bold active:bg-zinc-800"
-    >
-      {label}
-    </button>
+    <nav className="flex items-center gap-1.5" aria-label="Etapas">
+      {steps.map((label, i) => (
+        <div key={label} className="flex items-center gap-1.5">
+          {i > 0 && <div className="h-px w-4 bg-border" />}
+          <span
+            className={cn(
+              "flex items-center gap-1.5 text-xs font-medium",
+              i === current ? "text-foreground" : "text-muted-foreground",
+            )}
+          >
+            <span
+              className={cn(
+                "flex size-5 items-center justify-center rounded-full text-[11px] tabular-nums",
+                i < current
+                  ? "bg-primary text-primary-foreground"
+                  : i === current
+                    ? "border border-primary text-foreground"
+                    : "border border-border",
+              )}
+            >
+              {i < current ? <Check className="size-3" /> : i + 1}
+            </span>
+            {label}
+          </span>
+        </div>
+      ))}
+    </nav>
   );
 }
 
-function ModeButton({
+function teamSummary(playerCount: number, teamCount: number): string {
+  const base = Math.floor(playerCount / teamCount);
+  const leftover = playerCount % teamCount;
+  if (leftover === 0) {
+    return `${playerCount} jogadores → ${teamCount} times de ${base}`;
+  }
+  return `${playerCount} jogadores → ${teamCount} times de ${base} (${leftover} ${
+    leftover > 1 ? "times ficam" : "time fica"
+  } com ${base + 1})`;
+}
+
+function ModeOption({
   active,
   onClick,
+  icon,
   title,
   subtitle,
 }: {
   active: boolean;
   onClick: () => void;
+  icon: React.ReactNode;
   title: string;
   subtitle: string;
 }) {
@@ -412,14 +477,19 @@ function ModeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border p-3 text-left ${
+      aria-pressed={active}
+      className={cn(
+        "flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors",
         active
-          ? "border-green-600 bg-green-950/40"
-          : "border-zinc-800 bg-zinc-900/40"
-      }`}
+          ? "border-primary bg-primary/5 ring-1 ring-primary"
+          : "border-border hover:bg-muted",
+      )}
     >
-      <span className="block font-bold">{title}</span>
-      <span className="block text-xs text-zinc-400">{subtitle}</span>
+      <span className="flex items-center gap-1.5 text-sm font-medium">
+        {icon}
+        {title}
+      </span>
+      <span className="text-xs text-muted-foreground">{subtitle}</span>
     </button>
   );
 }
