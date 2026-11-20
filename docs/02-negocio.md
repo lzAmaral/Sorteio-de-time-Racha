@@ -61,7 +61,8 @@ Regra de ouro da pesquisa: **comissão sobre cliente que já era do dono é vene
 
 ## Nome e marca
 
-"Sorteio do Racha" descreve a ferramenta grátis, mas o negócio precisa de marca própria
-(candidatos a explorar: algo curto, dono de domínio `.app`/`.com.br`, que funcione tanto
-para o jogador quanto para a arena — ex.: **Colete** / "colete.app", remetendo ao sorteio
-e ao futebol amador). Decisão aberta — registrar domínio antes de divulgar.
+**Decidido (20/11/2026): VaiTerRacha** — vaiterracha.app + vaiterracha.com.br (ambos
+livres na checagem; registrar antes de divulgar). Racional e alternativas descartadas em
+[ADR-0005](decisoes/ADR-0005-marca-vaiterracha.md). A frase "vai ter racha?" já vive nos
+grupos e funciona para os dois lados: a pergunta da semana do jogador e a promessa para a
+arena ("na sua quadra sempre vai ter racha").

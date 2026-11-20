@@ -15,7 +15,7 @@ export default function Home() {
         </div>
         <div className="leading-tight">
           <p className="text-[15px] font-semibold tracking-tight">
-            Sorteio do Racha
+            VaiTerRacha
           </p>
           <p className="text-xs text-muted-foreground">
             Times equilibrados em segundos

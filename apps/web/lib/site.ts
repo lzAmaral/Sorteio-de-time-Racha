@@ -10,16 +10,15 @@
  */
 
 /**
- * Domínio final ainda **pendente** (issue #1 — deploy na Vercel + domínio
- * próprio, que depende da decisão de marca em docs/02-negocio.md). Até lá o
- * fallback serve de placeholder e a Vercel sobrescreve via
- * `NEXT_PUBLIC_SITE_URL` sem precisar de novo build manual do código.
+ * Marca decidida em 20/11/2026 (ADR-0005): **VaiTerRacha**, domínio
+ * vaiterracha.app (registro pendente — issue #1, deploy no Cloudflare Pages).
+ * `NEXT_PUBLIC_SITE_URL` sobrescreve o fallback sem novo build manual.
  */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://sorteiodoracha.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://vaiterracha.app";
 
-export const SITE_NAME = "Sorteio do Racha";
-export const SITE_TITLE = "Sorteio do Racha — times equilibrados em segundos";
+export const SITE_NAME = "VaiTerRacha";
+export const SITE_TITLE = "VaiTerRacha — sorteio de times equilibrados pro racha";
 export const SITE_TAGLINE = "Cola a lista, define os times e pronto";
 export const SITE_DESCRIPTION =
   "Cola a lista do grupo, define quantos times e pronto: sorteio equilibrado, cor de colete pra cada time e o resultado pronto pra mandar no zap. Grátis, sem cadastro.";

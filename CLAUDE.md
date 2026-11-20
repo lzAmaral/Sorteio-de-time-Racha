@@ -1,4 +1,4 @@
-# Sorteio do Racha — Guia para agentes
+# VaiTerRacha (Sorteio do Racha) — Guia para agentes
 
 Produto: *"Cola a lista do grupo, define quantos times e pronto: sorteio equilibrado,
 cor de colete pra cada time e resultado pronto pra mandar no zap."* Estratégia: camada

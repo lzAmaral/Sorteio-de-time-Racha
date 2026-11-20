@@ -30,7 +30,9 @@ Sorteio-de-time-Racha/
 | Decisão | Resumo | ADR |
 |---|---|---|
 | Stack TS + Next.js + Tailwind | Padrão dos projetos polidos do nicho; um só idioma no monorepo | [ADR-0001](decisoes/ADR-0001-stack.md) |
-| Local-first, sem backend no MVP | Zero fricção e funciona na beira do campo; Supabase entra na Fase 2 | [ADR-0002](decisoes/ADR-0002-local-first.md) |
+| Local-first, sem backend no MVP | Zero fricção e funciona na beira do campo; backend só na Fase 2 | [ADR-0002](decisoes/ADR-0002-local-first.md) |
+| Marca: VaiTerRacha | vaiterracha.app — decisão e alternativas | [ADR-0005](decisoes/ADR-0005-marca-vaiterracha.md) |
+| Infra: tudo Cloudflare | Pages + Workers + D1 + Durable Objects + better-auth | [ADR-0006](decisoes/ADR-0006-cloudflare.md) |
 | Greedy + hill-climbing no sorteio | Ponto ótimo custo-benefício validado na pesquisa OSS | [ADR-0003](decisoes/ADR-0003-algoritmo.md) |
 | PWA com service worker manual | App de rota única e estático não justifica `next-pwa`/Workbox | [ADR-0004](decisoes/ADR-0004-pwa.md) |
 
@@ -69,7 +71,7 @@ texto colado ──parser──▶ Player[] ──(edição do usuário)──�
 | Fase | Mudança arquitetural |
 |---|---|
 | Fase 1 (polimento) | ✅ PWA (manifest + service worker); compartilhar como imagem (canvas/`html-to-image`), analytics de uso |
-| Fase 2 (grupos/contas) | Supabase: auth, Postgres + RLS; `@racha/core` permanece intacto; nasce `packages/db` com schema e acesso |
+| Fase 2 (grupos/contas) | Cloudflare Workers (API) + D1 (banco) + Durable Objects (realtime) + **better-auth** (ADR-0006); `@racha/core` permanece intacto; nasce `packages/db` com schema e acesso |
 | Fase 3 (arena B2B) | Novo app `apps/arena` (painel do dono de quadra) no mesmo monorepo, reusando core e db; cobrança Pix via PSP (ex.: Mercado Pago, Asaas) |
 | Fase 4 (marketplace) | Página pública de quadras + vagas avulsas; só então existe backend "de verdade" com jobs |
 

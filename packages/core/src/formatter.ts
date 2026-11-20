@@ -7,7 +7,7 @@ import type { FormatOptions, Player, Team } from "./types";
 export function formatWhatsApp(teams: Team[], options: FormatOptions = {}): string {
   const {
     title = "SORTEIO DO RACHA",
-    footer = "Sorteado em segundos — bora pro jogo!",
+    footer = "Sorteado no VaiTerRacha — vaiterracha.app",
     reserves = [],
   } = options;
 

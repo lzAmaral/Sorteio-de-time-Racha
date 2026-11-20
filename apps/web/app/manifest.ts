@@ -6,8 +6,8 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Sorteio do Racha",
-    short_name: "Sorteio",
+    name: "VaiTerRacha — sorteio do racha",
+    short_name: "VaiTerRacha",
     description:
       "Cola a lista do grupo, define quantos times e pronto: sorteio equilibrado, cor de colete pra cada time e o resultado pronto pra mandar no zap.",
     lang: "pt-BR",

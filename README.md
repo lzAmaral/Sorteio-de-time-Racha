@@ -1,4 +1,4 @@
-# ⚽ Sorteio do Racha
+# ⚽ VaiTerRacha — Sorteio do Racha
 
 [![CI](https://github.com/lzAmaral/Sorteio-de-time-Racha/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lzAmaral/Sorteio-de-time-Racha/actions/workflows/ci.yml)
 [![Licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)

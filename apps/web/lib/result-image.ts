@@ -98,7 +98,7 @@ export interface ResultImageOptions {
 }
 
 const DEFAULT_TITLE = "SORTEIO DO RACHA";
-const DEFAULT_FOOTER = "Sorteio do Racha · times equilibrados em segundos";
+const DEFAULT_FOOTER = "VaiTerRacha · vaiterracha.app";
 
 /** "quinta-feira, 20 de novembro de 2026" (com a inicial maiúscula). */
 export function dateLabel(date = new Date()): string {
@@ -398,7 +398,7 @@ export async function shareResultImage(
     try {
       await navigator.share({
         files: [file],
-        title: "Sorteio do Racha",
+        title: "VaiTerRacha",
       });
       return "compartilhado";
     } catch (error) {
