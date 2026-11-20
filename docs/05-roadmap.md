@@ -27,7 +27,7 @@ Meta: organizadores reais usando toda semana. Métrica: sorteios/semana, % compa
 - [x] PWA: manifest, ícone, offline (service worker) — "funciona na beira do campo"
 - [ ] Compartilhar resultado como **imagem** (diferencial raro; validado no teammaker)
 - [x] Ajuste manual pós-sorteio (tap-tap para trocar jogador entre times)
-- [ ] Reservas/suplentes (quem chegou depois da lista fechar)
+- [x] Reservas/suplentes (quem chegou depois da lista fechar) — #5
 - [ ] Analytics de uso (ex.: Plausible/Umami — sem cookie banner)
 - [ ] SEO básico da landing (sem brigar com FutBora por termos genéricos)
 - [x] CI no GitHub Actions (test + build) e licença MIT — #8, PR #25

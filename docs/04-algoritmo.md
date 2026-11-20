@@ -18,6 +18,7 @@ Entrada: texto colado em qualquer formato típico de lista de racha. Regras por 
 | Emojis decorativos | `🔥 Bruno 🔥`, `Massuia✅` | removidos do nome |
 | Negrito do WhatsApp | `*Goleiro:*`, `_Linha_` | `*`/`_`/`~` das bordas removidos |
 | Seções | `*Goleiro:*` seguido de nomes, depois `*Linha:*` | todos abaixo de "Goleiro:" são goleiros até a próxima seção; cabeçalho genérico encerra a seção |
+| Seção de espera | `*Reservas:*`, `Suplentes:`, `Lista de espera:`, `Espera`, `Próximos:` | todos abaixo viram `isReserve: true` até a próxima seção/cabeçalho genérico |
 
 Invariantes: nunca lançar erro com entrada bagunçada (parse é melhor-esforço); nomes
 duplicados são permitidos (dois "João" existem na vida real); ordem de entrada preservada.
@@ -81,6 +82,30 @@ Na web o ajuste é **tap-tap** (sem drag-and-drop: ruim no mobile): 1º toque se
 toque em alguém de outro time troca, toque no mesmo jogador cancela. "Sortear de novo"
 recalcula a partir da lista e descarta os ajustes manuais.
 
+## 2.2 Reservas / lista de espera (`reserves.ts`)
+
+A lista fecha com 21 e aparecem 24 (issue #5). Quem está de fora leva
+`isReserve: true` no `Player` — estado **da partida**, não atributo do jogador (não é
+persistido junto com a nota no `localStorage`).
+
+| Peça | Contrato |
+|---|---|
+| `splitReserves(players)` | função pura → `{ active, reserves }`, preservando a ordem original dos dois lados (lista de espera = ordem de chegada) |
+| `drawTeams(players, opts)` | **assinatura inalterada** (`Team[]`): descarta reservas internamente, então reserva nunca entra em time nem conta na validação de jogadores insuficientes |
+| `formatWhatsApp(teams, { reserves })` | opção nova; com lista não vazia, acrescenta a seção `⏳ *RESERVAS*` numerada depois dos times e antes do rodapé |
+
+**Decisão de API:** `drawTeams` continua devolvendo `Team[]` (não virou
+`{ teams, reserves }`) para não quebrar os chamadores existentes; quem precisa da lista
+de espera chama `splitReserves`. O filtro acontece nos dois lados — a UI passa só os
+ativos *e* o balancer filtra de novo — porque "reserva não entra em time" é invariante de
+domínio, não detalhe de tela.
+
+Na web o toggle de reserva vive no passo 1, ao lado do toggle de goleiro: **um toque
+rebaixa, outro promove** (é o mesmo botão), e o aviso de tamanho dos times no passo 2
+recalcula na hora, contando só os ativos. No resultado as reservas aparecem numa seção
+própria depois dos times — sem tap-tap: promover/rebaixar é sempre no passo 1, para não
+competir com a troca manual (§2.1), que usa o toque no jogador.
+
 ## 3. Saída para o WhatsApp (`formatter.ts` + `vests.ts`)
 
 Paleta de coletes na ordem: Preto 🖤, Branco 🤍, Laranja 🧡, Azul 💙, Verde 💚,
@@ -100,6 +125,10 @@ Formato de saída (notas **nunca** aparecem — princípio: a nota é privada do
 1. Max 🧤
 2. Lucas
 3. Rafa
+
+⏳ *RESERVAS*
+1. Tonho
+2. Zé 🧤
 
 _Sorteado em segundos — bora pro jogo!_
 ```

@@ -32,6 +32,10 @@ const WHATSAPP_STYLE = /^[*_~\s]+|[*_~\s]+$/gu;
 // Exige ":" ou a palavra sozinha — "Linha Silva" é jogador, "Linha:" é seção.
 const SECTION_GK = /^goleiros?\s*(?::\s*|$)/iu;
 const SECTION_FIELD = /^(?:linha|jogadores(?:\s+de\s+linha)?|na\s+linha)\s*(?::\s*|$)/iu;
+// Lista de espera ("*Reservas:*", "Suplentes:", "Lista de espera:", "Próximos:"):
+// todo mundo abaixo vira reserva (isReserve) até a próxima seção/cabeçalho.
+const SECTION_RESERVE =
+  /^(?:reservas?|suplentes?|(?:lista\s+de\s+)?espera|pr[óo]ximos?)\s*(?::\s*|$)/iu;
 
 /**
  * Converte uma lista colada do WhatsApp em jogadores. Melhor-esforço: nunca lança
@@ -41,6 +45,8 @@ const SECTION_FIELD = /^(?:linha|jogadores(?:\s+de\s+linha)?|na\s+linha)\s*(?::\
 export function parseList(text: string): Player[] {
   const players: Player[] = [];
   let section: "field" | "gk" = "field";
+  // Dimensão independente da posição: dá pra ter goleiro reserva.
+  let reserveSection = false;
 
   for (const rawLine of text.split(/\r?\n/)) {
     const trimmed = rawLine.trim().replace(WHATSAPP_STYLE, "");
@@ -53,11 +59,20 @@ export function parseList(text: string): Player[] {
     if (!wasNumbered) {
       if (SECTION_GK.test(line)) {
         section = "gk";
+        reserveSection = false;
         line = line.replace(SECTION_GK, "");
         if (!/\p{L}/u.test(line)) continue; // "Goleiro:" puro; "Goleiro: Beto" segue
       } else if (SECTION_FIELD.test(line)) {
         section = "field";
+        reserveSection = false;
         line = line.replace(SECTION_FIELD, "");
+        if (!/\p{L}/u.test(line)) continue;
+      } else if (SECTION_RESERVE.test(line)) {
+        // Reserva é de linha por default; goleiro reserva precisa do marcador
+        // individual ("Reservas:" + "Tonho (g)").
+        section = "field";
+        reserveSection = true;
+        line = line.replace(SECTION_RESERVE, "");
         if (!/\p{L}/u.test(line)) continue;
       } else if (
         /:\s*$/.test(line) ||
@@ -67,6 +82,7 @@ export function parseList(text: string): Player[] {
       ) {
         // Cabeçalho genérico ("Confirmados:", "Racha sábado 19h") encerra a seção.
         section = "field";
+        reserveSection = false;
         continue;
       }
     }
@@ -111,6 +127,7 @@ export function parseList(text: string): Player[] {
       skill,
       isGoalkeeper,
       skillExplicit,
+      isReserve: reserveSection,
     });
   }
 
