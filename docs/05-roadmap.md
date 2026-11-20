@@ -29,7 +29,7 @@ Meta: organizadores reais usando toda semana. Métrica: sorteios/semana, % compa
 - [x] Ajuste manual pós-sorteio (tap-tap para trocar jogador entre times)
 - [ ] Reservas/suplentes (quem chegou depois da lista fechar)
 - [ ] Analytics de uso (ex.: Plausible/Umami — sem cookie banner)
-- [x] SEO básico da landing (sem brigar com FutBora por termos genéricos) — #7
+- [x] SEO básico da landing (sem brigar com FutBora por termos genéricos) — #7, PR #28
 - [x] CI no GitHub Actions (test + build) e licença MIT — #8, PR #25
 
 ## Fase 2 — Racha gerenciado (retenção)
