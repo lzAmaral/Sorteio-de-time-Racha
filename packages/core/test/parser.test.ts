@@ -133,6 +133,111 @@ describe("parseList", () => {
     expect(players.every((p) => !p.name.includes("✅"))).toBe(true);
   });
 
+  it("entende seção *Reservas:* com nomes numerados", () => {
+    const players = parseList(
+      [
+        "*Lista de sábado*",
+        "1. João",
+        "2. Pedro",
+        "",
+        "*Reservas:*",
+        "1. Tonho",
+        "2. Zé da Padaria",
+      ].join("\n"),
+    );
+    expect(
+      players.map((p) => [p.name, p.isReserve === true]),
+    ).toEqual([
+      ["João", false],
+      ["Pedro", false],
+      ["Tonho", true],
+      ["Zé da Padaria", true],
+    ]);
+  });
+
+  it("aceita os vários nomes da seção de espera", () => {
+    for (const header of [
+      "Reservas:",
+      "Reserva:",
+      "Suplentes:",
+      "Lista de espera:",
+      "Espera",
+      "*Próximos:*",
+    ]) {
+      const players = parseList(["1. João", header, "1. Tonho"].join("\n"));
+      expect(players.map((p) => p.isReserve === true)).toEqual([false, true]);
+    }
+  });
+
+  it("aceita reserva na mesma linha do cabeçalho ('Reservas: Tonho')", () => {
+    const players = parseList("1. João\nReservas: Tonho\nZé");
+    expect(players.map((p) => [p.name, p.isReserve === true])).toEqual([
+      ["João", false],
+      ["Tonho", true],
+      ["Zé", true],
+    ]);
+  });
+
+  it("goleiro reserva: marcador individual dentro da seção de espera", () => {
+    const players = parseList(
+      [
+        "*Goleiro:*",
+        "1 - Moreli",
+        "*Linha:*",
+        "1 - João",
+        "*Reservas:*",
+        "1 - Tonho (g)",
+        "2 - Zé",
+      ].join("\n"),
+    );
+    expect(
+      players.map((p) => [p.name, p.isGoalkeeper, p.isReserve === true]),
+    ).toEqual([
+      ["Moreli", true, false],
+      ["João", false, false],
+      ["Tonho", true, true],
+      ["Zé", false, true],
+    ]);
+  });
+
+  it("seção de linha/goleiro e cabeçalho genérico encerram a espera", () => {
+    const players = parseList(
+      [
+        "Reservas:",
+        "1. Tonho",
+        "Linha:",
+        "1. João",
+        "Reservas:",
+        "1. Zé",
+        "Confirmados:",
+        "1. Ana",
+      ].join("\n"),
+    );
+    expect(players.map((p) => [p.name, p.isReserve === true])).toEqual([
+      ["Tonho", true],
+      ["João", false],
+      ["Zé", true],
+      ["Ana", false],
+    ]);
+  });
+
+  it("lista sem seção de reservas não marca ninguém como reserva", () => {
+    const players = parseList(
+      ["1. João", "2. Pedro (g)", "3. Lucas - 4"].join("\n"),
+    );
+    expect(players).toHaveLength(3);
+    expect(players.some((p) => p.isReserve)).toBe(false);
+  });
+
+  it("linha numerada não abre seção de reservas", () => {
+    // "1. Reserva" é apelido de jogador, não cabeçalho.
+    const players = parseList("1. Reserva\n2. João");
+    expect(players.map((p) => [p.name, p.isReserve === true])).toEqual([
+      ["Reserva", false],
+      ["João", false],
+    ]);
+  });
+
   it("permite nomes duplicados", () => {
     const players = parseList("João\nJoão");
     expect(players).toHaveLength(2);

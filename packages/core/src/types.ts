@@ -7,6 +7,11 @@ export interface Player {
   isGoalkeeper: boolean;
   /** true se a nota veio explícita na lista colada (ex.: "João - 4"). */
   skillExplicit?: boolean;
+  /**
+   * Reserva/suplente do dia (issue #5): fica FORA do sorteio e aparece só na
+   * lista de espera do resultado. É estado da partida, não atributo do jogador.
+   */
+  isReserve?: boolean;
 }
 
 /** Cor de colete com representação para UI e para texto do WhatsApp. */
@@ -37,4 +42,9 @@ export interface Team {
 export interface FormatOptions {
   title?: string;
   footer?: string;
+  /**
+   * Lista de espera (issue #5): quando presente e não vazia, sai numa seção
+   * "⏳ *RESERVAS*" depois dos times, na ordem recebida (ordem de chegada).
+   */
+  reserves?: Player[];
 }

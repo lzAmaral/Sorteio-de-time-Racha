@@ -6,6 +6,7 @@ import {
   drawTeams,
   formatWhatsApp,
   parseList,
+  splitReserves,
   swapPlayers,
   whatsAppShareUrl,
   type DrawMode,
@@ -17,6 +18,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   Check,
+  Clock,
   Copy,
   Dices,
   Hand,
@@ -61,6 +63,7 @@ const PLACEHOLDER = [
   "3. Pedro - 4",
   "4. Lucas",
   "5. Rafa",
+  "Reservas: Tonho",
 ].join("\n");
 
 function loadNotes(): Record<string, StoredNote> {
@@ -186,7 +189,8 @@ export function SorteioFlow() {
   function sortear() {
     // Novo sorteio a partir de `players`: descarta qualquer ajuste manual.
     clearSwapState();
-    setTeams(drawTeams(players, { teamCount, mode }));
+    // Reservas ficam fora do sorteio (issue #5) — só aparecem no resultado.
+    setTeams(drawTeams(splitReserves(players).active, { teamCount, mode }));
     setStep("resultado");
     setCopied(false);
   }
@@ -233,12 +237,20 @@ export function SorteioFlow() {
   async function copyResult() {
     if (!teams) return;
     try {
-      await navigator.clipboard.writeText(formatWhatsApp(teams));
+      await navigator.clipboard.writeText(resultText(teams));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard bloqueado (http/permissão): o usuário ainda tem o botão do WhatsApp
     }
+  }
+
+  // Reservas saem do sorteio mas seguem na tela: tudo que fala de tamanho de
+  // time conta só os ativos (issue #5).
+  const { active: activePlayers, reserves } = splitReserves(players);
+  /** Texto do zap: times + lista de espera na ordem da lista. */
+  function resultText(current: Team[]): string {
+    return formatWhatsApp(current, { reserves });
   }
 
   /**
@@ -262,8 +274,15 @@ export function SorteioFlow() {
     }
   }
 
-  const maxTeams = Math.min(8, Math.max(2, Math.floor(players.length / 2)));
+  const maxTeams = Math.min(8, Math.max(2, Math.floor(activePlayers.length / 2)));
   const stepIndex = step === "lista" ? 0 : step === "config" ? 1 : 2;
+
+  // Marcar muita gente como reserva pode deixar o número de times salvo maior
+  // do que a lista aguenta — reduz sozinho em vez de estourar no sorteio.
+  useEffect(() => {
+    if (activePlayers.length >= 4) setTeamCount((n) => Math.min(n, maxTeams));
+  }, [activePlayers.length, maxTeams]);
+
   const selectedPlayer =
     (selectedId &&
       teams?.flatMap((t) => t.players).find((p) => p.id === selectedId)) ||
@@ -279,8 +298,8 @@ export function SorteioFlow() {
             <CardHeader>
               <CardTitle>Cola a lista do grupo</CardTitle>
               <CardDescription>
-                Números, seções de goleiro, ✅ de confirmação — pode colar do
-                jeito que estiver.
+                Números, seções de goleiro e de reservas, ✅ de confirmação —
+                pode colar do jeito que estiver.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -303,15 +322,26 @@ export function SorteioFlow() {
                   <Badge variant="secondary" className="ml-2 align-middle">
                     {players.filter((p) => p.isGoalkeeper).length} no gol
                   </Badge>
+                  {reserves.length > 0 && (
+                    <Badge variant="outline" className="ml-1.5 align-middle gap-1">
+                      <Clock className="size-3" />
+                      {reserves.length}{" "}
+                      {reserves.length === 1 ? "reserva" : "reservas"}
+                    </Badge>
+                  )}
                 </CardTitle>
                 <CardDescription>
-                  Ajusta as notas (só você vê) e marca quem é goleiro.
+                  Ajusta as notas (só você vê), marca quem é goleiro e quem é
+                  reserva (fica fora do sorteio).
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="divide-y divide-border">
                   {players.map((p) => (
-                    <li key={p.id} className="flex items-center gap-2 py-1.5">
+                    <li
+                      key={p.id}
+                      className="flex items-center gap-1.5 py-1.5"
+                    >
                       <Button
                         variant={p.isGoalkeeper ? "default" : "ghost"}
                         size="icon-sm"
@@ -324,13 +354,38 @@ export function SorteioFlow() {
                           className={cn(!p.isGoalkeeper && "stroke-zinc-400")}
                         />
                       </Button>
-                      <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                      {/* Um toque aqui promove/rebaixa reserva (issue #5). */}
+                      <Button
+                        variant={p.isReserve ? "default" : "ghost"}
+                        size="icon-sm"
+                        aria-label={
+                          p.isReserve
+                            ? `${p.name}: promover a titular`
+                            : `${p.name}: marcar como reserva`
+                        }
+                        aria-pressed={!!p.isReserve}
+                        onClick={() =>
+                          updatePlayer(p.id, { isReserve: !p.isReserve })
+                        }
+                      >
+                        <Clock
+                          className={cn(!p.isReserve && "stroke-zinc-400")}
+                        />
+                      </Button>
+                      <span
+                        className={cn(
+                          "min-w-0 flex-1 truncate text-sm font-medium",
+                          p.isReserve && "text-muted-foreground line-through",
+                        )}
+                      >
                         {p.name}
                       </span>
-                      <StarRating
-                        value={p.skill}
-                        onChange={(skill) => updatePlayer(p.id, { skill })}
-                      />
+                      <div className={cn(p.isReserve && "opacity-40")}>
+                        <StarRating
+                          value={p.skill}
+                          onChange={(skill) => updatePlayer(p.id, { skill })}
+                        />
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -365,10 +420,16 @@ export function SorteioFlow() {
             </Card>
           )}
 
+          {players.length > 0 && activePlayers.length < 4 && (
+            <p className="text-center text-xs text-muted-foreground">
+              Precisa de pelo menos 4 jogadores fora da reserva pra sortear.
+            </p>
+          )}
+
           <Button
             size="lg"
             className="h-11 w-full text-[15px]"
-            disabled={players.length < 4}
+            disabled={activePlayers.length < 4}
             onClick={() => setStep("config")}
           >
             Continuar
@@ -408,8 +469,15 @@ export function SorteioFlow() {
                 </Button>
               </div>
               <p className="text-center text-sm text-muted-foreground">
-                {teamSummary(players.length, teamCount)}
+                {teamSummary(activePlayers.length, teamCount)}
               </p>
+              {reserves.length > 0 && (
+                <p className="mt-1 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+                  <Clock className="size-3" />+ {reserves.length}{" "}
+                  {reserves.length === 1 ? "reserva" : "reservas"} de fora do
+                  sorteio
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -525,6 +593,57 @@ export function SorteioFlow() {
             </Card>
           ))}
 
+          {reserves.length > 0 && (
+            <Card size="sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="size-3.5 text-muted-foreground" />
+                  Reservas
+                  <Badge variant="secondary" className="ml-auto">
+                    {reserves.length} na espera
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Fora do sorteio, na ordem da lista. Pra escalar alguém, volta
+                  pra lista e toca no relógio.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ol className="flex flex-col gap-0.5">
+                  {reserves.map((p, i) => (
+                    <li
+                      key={p.id}
+                      className="flex items-center gap-3 px-2 py-2 text-sm text-muted-foreground"
+                    >
+                      <span className="w-4 text-right text-xs tabular-nums">
+                        {i + 1}
+                      </span>
+                      <span className="font-medium">{p.name}</span>
+                      {p.isGoalkeeper && (
+                        <Badge variant="outline" className="ml-auto gap-1">
+                          <Hand className="size-3" />
+                          goleiro
+                        </Badge>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full"
+                  onClick={() => {
+                    clearSwapState();
+                    setStep("lista");
+                  }}
+                >
+                  <ArrowLeft data-icon="inline-start" />
+                  Mexer nas reservas
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {(selectedPlayer || swapMessage) && (
             <div
               className={cn(
@@ -587,7 +706,7 @@ export function SorteioFlow() {
               {copied ? "Copiado!" : "Copiar"}
             </Button>
             <a
-              href={teams ? whatsAppShareUrl(formatWhatsApp(teams)) : "#"}
+              href={teams ? whatsAppShareUrl(resultText(teams)) : "#"}
               target="_blank"
               rel="noopener noreferrer"
               className={cn(

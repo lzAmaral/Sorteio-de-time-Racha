@@ -12,4 +12,6 @@ export { formatWhatsApp, whatsAppShareUrl } from "./formatter";
 export { VESTS, vestFor } from "./vests";
 export { canSwap, SwapError, swapPlayers } from "./swap";
 export type { SwapCheck, SwapErrorCode } from "./swap";
+export { splitReserves } from "./reserves";
+export type { ReserveSplit } from "./reserves";
 export { seededRng, shuffle } from "./random";

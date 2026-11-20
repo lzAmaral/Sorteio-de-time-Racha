@@ -1,6 +1,7 @@
 import type { DrawOptions, Player, Team } from "./types";
 import { shuffle } from "./random";
 import { sortForDisplay } from "./display";
+import { splitReserves } from "./reserves";
 import { vestFor } from "./vests";
 
 const MAX_REFINE_PASSES = 60;
@@ -11,12 +12,16 @@ const EPSILON = 1e-9;
  * seed greedy com aleatoriedade nos empates e refino por trocas até minimizar o
  * spread de médias. Modo "random": distribuição embaralhada (goleiros ainda 1 por time).
  * Racional completo em docs/decisoes/ADR-0003-algoritmo.md.
+ *
+ * Reservas (`isReserve`) são descartadas aqui: nunca entram em time (issue #5).
+ * Use `splitReserves` para também obter a lista de espera.
  */
-export function drawTeams(players: Player[], options: DrawOptions): Team[] {
+export function drawTeams(allPlayers: Player[], options: DrawOptions): Team[] {
   const { teamCount, mode = "balanced", rng = Math.random } = options;
   if (!Number.isInteger(teamCount) || teamCount < 2) {
     throw new Error("teamCount deve ser um inteiro ≥ 2");
   }
+  const { active: players } = splitReserves(allPlayers);
   if (players.length < teamCount) {
     throw new Error(
       `Jogadores insuficientes: ${players.length} para ${teamCount} times`,

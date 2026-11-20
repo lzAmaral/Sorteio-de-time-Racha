@@ -9,6 +9,7 @@ colete pra cada time e o resultado pronto pra mandar no zap.
 - 🆓 Grátis, sem cadastro, direto no navegador (mobile-first)
 - 📋 Entende a lista colada do WhatsApp em qualquer formato (números, emojis, `(g)`, `⭐`)
 - ⚖️ Sorteio equilibrado por notas privadas (1–5) com goleiro garantido em cada time
+- ⏳ Reservas/suplentes: ficam fora do sorteio e saem numa lista de espera no resultado
 - 🎽 Cores de colete reais de quadra (preto, branco, laranja, azul…)
 - 💬 Resultado formatado para copiar ou mandar direto no WhatsApp
 - 🔒 As notas ficam **só no navegador do organizador** — ninguém descobre a própria nota
