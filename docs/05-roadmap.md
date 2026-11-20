@@ -25,11 +25,11 @@ Meta: organizadores reais usando toda semana. Métrica: sorteios/semana, % compa
 
 - [ ] Deploy (Vercel) + domínio próprio (decidir marca antes — ver [negócio](02-negocio.md))
 - [x] PWA: manifest, ícone, offline (service worker) — "funciona na beira do campo"
-- [ ] Compartilhar resultado como **imagem** (diferencial raro; validado no teammaker)
+- [x] Compartilhar resultado como **imagem** (card em canvas + Web Share API) — #3
 - [x] Ajuste manual pós-sorteio (tap-tap para trocar jogador entre times)
 - [x] Reservas/suplentes (quem chegou depois da lista fechar) — #5
 - [ ] Analytics de uso (ex.: Plausible/Umami — sem cookie banner)
-- [ ] SEO básico da landing (sem brigar com FutBora por termos genéricos)
+- [x] SEO básico da landing (sem brigar com FutBora por termos genéricos) — #7, PR #28
 - [x] CI no GitHub Actions (test + build) e licença MIT — #8, PR #25
 
 ## Fase 2 — Racha gerenciado (retenção)
