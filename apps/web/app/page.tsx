@@ -1,5 +1,10 @@
 import { Shirt } from "lucide-react";
 import { SorteioFlow } from "@/components/sorteio-flow";
+import {
+  ComoFunciona,
+  PerguntasFrequentes,
+} from "@/components/landing-sections";
+import { structuredData } from "@/lib/site";
 
 export default function Home() {
   return (
@@ -22,9 +27,22 @@ export default function Home() {
         <SorteioFlow />
       </main>
 
-      <footer className="pb-6 text-center text-xs text-muted-foreground">
+      {/* Conteúdo indexável, sempre abaixo da dobra: a ferramenta é a landing. */}
+      <ComoFunciona />
+      <PerguntasFrequentes />
+
+      <footer className="py-7 text-center text-xs text-muted-foreground">
         Grátis, sem cadastro. Suas notas ficam só no seu navegador.
       </footer>
+
+      {/* Schema.org (WebApplication + FAQPage) — renderizado no build. */}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger -- conteúdo estático nosso, sem input de usuário
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData()).replace(/</g, "\\u003c"),
+        }}
+      />
     </div>
   );
 }
