@@ -127,3 +127,31 @@
     @apply font-sans;
   }
 }
+
+/* Feedback de troca manual bloqueada no resultado (issue #4). */
+@keyframes racha-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@utility animate-shake {
+  animation: racha-shake 0.32s ease-in-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

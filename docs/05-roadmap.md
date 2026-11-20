@@ -26,7 +26,7 @@ Meta: organizadores reais usando toda semana. Métrica: sorteios/semana, % compa
 - [ ] Deploy (Vercel) + domínio próprio (decidir marca antes — ver [negócio](02-negocio.md))
 - [ ] PWA: manifest, ícone, offline (service worker) — "funciona na beira do campo"
 - [ ] Compartilhar resultado como **imagem** (diferencial raro; validado no teammaker)
-- [ ] Ajuste manual pós-sorteio (arrastar/trocar jogador entre times)
+- [x] Ajuste manual pós-sorteio (tap-tap para trocar jogador entre times)
 - [ ] Reservas/suplentes (quem chegou depois da lista fechar)
 - [ ] Analytics de uso (ex.: Plausible/Umami — sem cookie banner)
 - [ ] SEO básico da landing (sem brigar com FutBora por termos genéricos)
