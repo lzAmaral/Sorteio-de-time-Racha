@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 
+// Obrigatório com `output: "export"` (ADR-0006): rota gerada no build.
+export const dynamic = "force-static";
+
 /**
  * Manifest do PWA (convenção do App Router — servido em /manifest.webmanifest).
  * Os ícones vêm de `public/icons/`, gerados por `npm run icons`.

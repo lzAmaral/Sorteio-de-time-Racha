@@ -1,6 +1,9 @@
 import { ImageResponse } from "next/og";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
+// Obrigatório com `output: "export"` (ADR-0006): rota gerada no build.
+export const dynamic = "force-static";
+
 /**
  * OG image pela convenção do App Router (servida em /opengraph-image.png).
  *
