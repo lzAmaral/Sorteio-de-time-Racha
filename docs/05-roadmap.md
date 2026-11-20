@@ -3,6 +3,11 @@
 > Critério de passagem de fase: **cada fase só começa quando a anterior prova demanda.**
 > Status marcado em cada item; agentes devem atualizar este arquivo ao concluir entregas.
 
+> **As specs executáveis vivem nas issues do GitHub** — cada item das Fases 1–4 tem uma
+> issue com contexto, escopo, critérios de aceite e notas técnicas, agrupadas por
+> milestone (uma por fase): https://github.com/lzAmaral/Sorteio-de-time-Racha/issues
+> Issues com a label `spec-pronta` estão prontas para um agente pegar e executar.
+
 ## Fase 0 — MVP do Sorteio ✅ (estruturado em 18/11/2026)
 
 O produto da frase original: *"Cola a lista do grupo, define quantos times e pronto."*

@@ -23,6 +23,7 @@ npm run typecheck    # tsc em todos os workspaces
 | `apps/web` | Next.js 15 (App Router) + Tailwind 4. Fluxo de 3 passos em `components/sorteio-flow.tsx`. |
 | `docs/` | Fonte da verdade de produto/negócio. Leia antes de decidir qualquer coisa de escopo. |
 | `docs/05-roadmap.md` | Estado das fases. **Atualize os checkboxes ao concluir entregas.** |
+| Issues no GitHub | **Fonte das specs executáveis.** Cada task do roadmap é uma issue com escopo e critérios de aceite, agrupada por milestone (fase). Use `gh issue list --milestone "Fase 1 — Lançamento público"` para ver o que está pronto (`spec-pronta`). Ao trabalhar numa issue: branch própria, PR referenciando `Closes #N`, e só feche com os critérios de aceite cumpridos. |
 | `docs/decisoes/` | ADRs. Decisão arquitetural nova = novo ADR numerado; não contradiga um ADR aceito sem criar outro que o substitua. |
 
 ## Regras do projeto
