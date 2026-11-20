@@ -30,7 +30,7 @@ Meta: organizadores reais usando toda semana. Métrica: sorteios/semana, % compa
 - [ ] Reservas/suplentes (quem chegou depois da lista fechar)
 - [ ] Analytics de uso (ex.: Plausible/Umami — sem cookie banner)
 - [ ] SEO básico da landing (sem brigar com FutBora por termos genéricos)
-- [ ] CI no GitHub Actions (test + build) e licença MIT
+- [x] CI no GitHub Actions (test + build) e licença MIT — #8, PR #25
 
 ## Fase 2 — Racha gerenciado (retenção)
 

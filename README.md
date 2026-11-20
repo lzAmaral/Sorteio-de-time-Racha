@@ -1,5 +1,8 @@
 # ⚽ Sorteio do Racha
 
+[![CI](https://github.com/lzAmaral/Sorteio-de-time-Racha/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/lzAmaral/Sorteio-de-time-Racha/actions/workflows/ci.yml)
+[![Licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
+
 **Cola a lista do grupo, define quantos times e pronto:** sorteio equilibrado, cor de
 colete pra cada time e o resultado pronto pra mandar no zap.
 
@@ -47,3 +50,7 @@ O mercado B2C de apps de pelada é saturado e grátis; donos de quadra pagam R$ 
 por sistemas que só fazem agenda. Este projeto usa o sorteio grátis como aquisição e mira
 o B2B: um painel para arenas que **gerencia o racha e garante o pagamento por jogador** —
 ciclo que ninguém fecha no Brasil hoje. Detalhes na [pesquisa](docs/pesquisa/01-mercado.md).
+
+## Licença
+
+[MIT](LICENSE) © 2026 Luiz Amaral
